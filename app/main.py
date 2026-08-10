@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 
+from app.api.v1.suppliers import router as supplier_router
+
+
 app = FastAPI(
     title="Supplier Price Intelligence API",
     description=(
@@ -8,6 +11,12 @@ app = FastAPI(
         "price comparison, and supplier recommendations."
     ),
     version="0.1.0",
+)
+
+
+app.include_router(
+    supplier_router,
+    prefix="/api/v1",
 )
 
 
