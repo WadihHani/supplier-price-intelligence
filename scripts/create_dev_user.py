@@ -1,4 +1,5 @@
 import argparse
+import getpass
 import sys
 from pathlib import Path
 
@@ -16,17 +17,19 @@ def main() -> None:
         description="Create a local development user.",
     )
     parser.add_argument("email", help="Email address for the local user")
-    parser.add_argument(
-        "password",
-        help="Password for the local user (minimum 8 characters)",
-    )
     args = parser.parse_args()
+    password = getpass.getpass("Password (minimum 8 characters): ")
+    confirmation = getpass.getpass("Confirm password: ")
+
+    if password != confirmation:
+        raise SystemExit("Passwords do not match.")
+
     db = SessionLocal()
 
     try:
         user = auth_service.register_user(
             db,
-            UserRegister(email=args.email, password=args.password),
+            UserRegister(email=args.email, password=password),
         )
     except HTTPException as error:
         raise SystemExit(error.detail) from error
