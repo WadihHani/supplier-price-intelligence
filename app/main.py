@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api.v1.auth import router as auth_router
 from app.api.v1.products import router as product_router
 from app.api.v1.suppliers import router as supplier_router
 from app.api.v1.supplier_quotes import router as supplier_quote_router
@@ -15,6 +16,11 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
+app.include_router(
+    auth_router,
+    prefix="/api/v1",
+)
 
 app.include_router(
     supplier_router,

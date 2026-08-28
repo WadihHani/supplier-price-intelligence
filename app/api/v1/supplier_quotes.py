@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
+from app.api.dependencies import get_current_admin, get_current_user
 from app.schemas.supplier_quote import (
     SupplierQuoteCreate,
     SupplierQuoteResponse,
@@ -13,6 +14,7 @@ from app.services.supplier_quote import supplier_quote_service
 router = APIRouter(
     prefix="/supplier-quotes",
     tags=["Supplier Quotes"],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -84,6 +86,7 @@ def update_supplier_quote(
 def delete_supplier_quote(
     quote_id: int,
     db: Session = Depends(get_db),
+    current_admin=Depends(get_current_admin),
 ):
     supplier_quote_service.delete_quote(
         db,

@@ -1,14 +1,6 @@
 from uuid import uuid4
 
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-
-client = TestClient(app)
-
-
-def create_supplier():
+def create_supplier(client):
     unique_id = uuid4().hex[:8]
 
     response = client.post(
@@ -25,7 +17,7 @@ def create_supplier():
     return response.json()["id"]
 
 
-def create_product():
+def create_product(client):
     unique_id = uuid4().hex[:8]
 
     response = client.post(
@@ -42,9 +34,9 @@ def create_product():
     return response.json()["id"]
 
 
-def create_quote():
-    supplier_id = create_supplier()
-    product_id = create_product()
+def create_quote(client):
+    supplier_id = create_supplier(client)
+    product_id = create_product(client)
 
     response = client.post(
         "/api/v1/supplier-quotes",
@@ -64,8 +56,8 @@ def create_quote():
     return response.json()
 
 
-def test_create_supplier_quote():
-    quote = create_quote()
+def test_create_supplier_quote(client):
+    quote = create_quote(client)
 
     assert quote["unit_price"] == 720.50
     assert quote["currency"] == "USD"
@@ -73,8 +65,8 @@ def test_create_supplier_quote():
     assert quote["is_active"] is True
 
 
-def test_supplier_quote_supplier_not_found():
-    product_id = create_product()
+def test_supplier_quote_supplier_not_found(client):
+    product_id = create_product(client)
 
     response = client.post(
         "/api/v1/supplier-quotes",
@@ -92,8 +84,8 @@ def test_supplier_quote_supplier_not_found():
     assert response.json()["detail"] == "Supplier not found."
 
 
-def test_supplier_quote_product_not_found():
-    supplier_id = create_supplier()
+def test_supplier_quote_product_not_found(client):
+    supplier_id = create_supplier(client)
 
     response = client.post(
         "/api/v1/supplier-quotes",
@@ -111,8 +103,8 @@ def test_supplier_quote_product_not_found():
     assert response.json()["detail"] == "Product not found."
 
 
-def test_get_supplier_quote():
-    quote = create_quote()
+def test_get_supplier_quote(client):
+    quote = create_quote(client)
 
     response = client.get(
         f"/api/v1/supplier-quotes/{quote['id']}"
@@ -122,8 +114,8 @@ def test_get_supplier_quote():
     assert response.json()["id"] == quote["id"]
 
 
-def test_update_supplier_quote():
-    quote = create_quote()
+def test_update_supplier_quote(client):
+    quote = create_quote(client)
 
     response = client.put(
         f"/api/v1/supplier-quotes/{quote['id']}",
@@ -143,8 +135,8 @@ def test_update_supplier_quote():
     assert data["notes"] == "Updated quote"
 
 
-def test_delete_supplier_quote():
-    quote = create_quote()
+def test_delete_supplier_quote(client):
+    quote = create_quote(client)
 
     response = client.delete(
         f"/api/v1/supplier-quotes/{quote['id']}"

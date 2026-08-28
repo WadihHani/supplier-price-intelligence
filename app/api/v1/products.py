@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
+from app.api.dependencies import get_current_admin, get_current_user
 from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
 from app.schemas.procurement_analysis import ProcurementAnalysisResponse
 from app.schemas.procurement_recommendation import (
@@ -22,6 +23,7 @@ from app.services.supplier_scoring import supplier_scoring_service
 router = APIRouter(
     prefix="/products",
     tags=["Products"],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -172,6 +174,7 @@ def update_product(
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db),
+    current_admin=Depends(get_current_admin),
 ):
     product_service.delete_product(
         db,

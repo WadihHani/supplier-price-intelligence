@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
+from app.api.dependencies import get_current_admin, get_current_user
 from app.schemas.supplier import SupplierCreate, SupplierResponse, SupplierUpdate
 from app.services.supplier import supplier_service
 
@@ -9,6 +10,7 @@ from app.services.supplier import supplier_service
 router = APIRouter(
     prefix="/suppliers",
     tags=["Suppliers"],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -80,6 +82,7 @@ def update_supplier(
 def delete_supplier(
     supplier_id: int,
     db: Session = Depends(get_db),
+    current_admin=Depends(get_current_admin),
 ):
     supplier_service.delete_supplier(
         db,
