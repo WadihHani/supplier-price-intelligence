@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
 from app.api.v1.auth import router as auth_router
 from app.api.v1.products import router as product_router
 from app.api.v1.suppliers import router as supplier_router
@@ -14,6 +16,14 @@ app = FastAPI(
         "price comparison, and supplier recommendations."
     ),
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 
