@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
+from app.schemas.procurement_analysis import ProcurementAnalysisResponse
 from app.schemas.quote_comparison import QuoteComparisonResponse
 from app.services.product import product_service
+from app.services.procurement_analysis import procurement_analysis_service
 from app.services.quote_comparison import quote_comparison_service
 
 
@@ -59,6 +61,25 @@ def get_product_price_comparison(
     )
 
     return quote_comparison_service.compare_product_quotes(
+        db,
+        product_id,
+    )
+
+
+@router.get(
+    "/{product_id}/procurement-analysis",
+    response_model=ProcurementAnalysisResponse,
+)
+def get_product_procurement_analysis(
+    product_id: int,
+    db: Session = Depends(get_db),
+):
+    product_service.get_product(
+        db,
+        product_id,
+    )
+
+    return procurement_analysis_service.analyze_product_quotes(
         db,
         product_id,
     )
