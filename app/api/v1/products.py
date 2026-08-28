@@ -4,10 +4,17 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
 from app.schemas.procurement_analysis import ProcurementAnalysisResponse
+from app.schemas.procurement_recommendation import (
+    ProcurementRecommendationResponse,
+)
 from app.schemas.quote_comparison import QuoteComparisonResponse
 from app.schemas.supplier_scoring import SupplierScoringResponse
 from app.services.product import product_service
 from app.services.procurement_analysis import procurement_analysis_service
+from app.services.procurement_recommendation import (
+    ProcurementRecommendationService,
+    get_procurement_recommendation_service,
+)
 from app.services.quote_comparison import quote_comparison_service
 from app.services.supplier_scoring import supplier_scoring_service
 
@@ -101,6 +108,28 @@ def get_product_supplier_ranking(
     )
 
     return supplier_scoring_service.analyze_supplier_options(
+        db,
+        product_id,
+    )
+
+
+@router.get(
+    "/{product_id}/ai-recommendation",
+    response_model=ProcurementRecommendationResponse,
+)
+def get_product_ai_recommendation(
+    product_id: int,
+    db: Session = Depends(get_db),
+    recommendation_service: ProcurementRecommendationService = Depends(
+        get_procurement_recommendation_service
+    ),
+):
+    product_service.get_product(
+        db,
+        product_id,
+    )
+
+    return recommendation_service.generate_recommendation(
         db,
         product_id,
     )

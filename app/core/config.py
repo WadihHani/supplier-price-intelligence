@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     environment: str = "development"
 
     database_url: str = "sqlite:///./supplier_intelligence.db"
+    ai_provider: str = "mock"
+    ai_api_key: str | None = None
+    ai_model: str = "gpt-4o-mini"
 
     model_config = SettingsConfigDict(
         env_file=".env",
