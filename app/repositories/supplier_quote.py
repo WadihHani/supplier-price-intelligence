@@ -39,6 +39,24 @@ class SupplierQuoteRepository:
             .all()
         )
 
+    def get_by_product(
+        self,
+        db: Session,
+        product_id: int,
+        active_only: bool = True,
+    ) -> list[SupplierQuote]:
+        query = (
+            db.query(SupplierQuote)
+            .filter(SupplierQuote.product_id == product_id)
+        )
+
+        if active_only:
+            query = query.filter(
+                SupplierQuote.is_active.is_(True)
+            )
+
+        return query.all()
+
     def update(
         self,
         db: Session,

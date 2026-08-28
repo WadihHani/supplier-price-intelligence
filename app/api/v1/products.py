@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
+from app.schemas.quote_comparison import QuoteComparisonResponse
 from app.services.product import product_service
+from app.services.quote_comparison import quote_comparison_service
 
 
 router = APIRouter(
@@ -40,6 +42,25 @@ def get_products(
         db,
         skip=skip,
         limit=limit,
+    )
+
+
+@router.get(
+    "/{product_id}/price-comparison",
+    response_model=QuoteComparisonResponse,
+)
+def get_product_price_comparison(
+    product_id: int,
+    db: Session = Depends(get_db),
+):
+    product_service.get_product(
+        db,
+        product_id,
+    )
+
+    return quote_comparison_service.compare_product_quotes(
+        db,
+        product_id,
     )
 
 
