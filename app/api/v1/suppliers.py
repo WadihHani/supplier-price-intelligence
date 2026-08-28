@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
@@ -34,8 +34,8 @@ def create_supplier(
     response_model=list[SupplierResponse],
 )
 def get_suppliers(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
     return supplier_service.get_suppliers(

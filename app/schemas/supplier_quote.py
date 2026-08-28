@@ -1,14 +1,14 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SupplierQuoteBase(BaseModel):
     supplier_id: int
     product_id: int
-    unit_price: float
-    currency: str = "USD"
-    quantity: int = 1
+    unit_price: float = Field(ge=0)
+    currency: str = Field(default="USD", min_length=1, max_length=10)
+    quantity: int = Field(default=1, ge=1)
     quote_date: datetime
     valid_until: datetime | None = None
     notes: str | None = None
@@ -21,9 +21,9 @@ class SupplierQuoteCreate(SupplierQuoteBase):
 class SupplierQuoteUpdate(BaseModel):
     supplier_id: int | None = None
     product_id: int | None = None
-    unit_price: float | None = None
-    currency: str | None = None
-    quantity: int | None = None
+    unit_price: float | None = Field(default=None, ge=0)
+    currency: str | None = Field(default=None, min_length=1, max_length=10)
+    quantity: int | None = Field(default=None, ge=1)
     quote_date: datetime | None = None
     valid_until: datetime | None = None
     notes: str | None = None

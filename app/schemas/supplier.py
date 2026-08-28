@@ -4,8 +4,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class SupplierBase(BaseModel):
-    name: str
-    code: str
+    name: str = Field(min_length=1, max_length=255)
+    code: str = Field(min_length=1, max_length=50)
     email: EmailStr | None = None
     phone: str | None = None
     country: str | None = None
@@ -27,8 +27,8 @@ class SupplierCreate(SupplierBase):
 
 
 class SupplierUpdate(BaseModel):
-    name: str | None = None
-    code: str | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    code: str | None = Field(default=None, min_length=1, max_length=50)
     email: EmailStr | None = None
     phone: str | None = None
     country: str | None = None

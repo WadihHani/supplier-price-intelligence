@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
@@ -47,8 +47,8 @@ def create_product(
     response_model=list[ProductResponse],
 )
 def get_products(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
     return product_service.get_products(

@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProductBase(BaseModel):
-    name: str
-    sku: str
+    name: str = Field(min_length=1, max_length=255)
+    sku: str = Field(min_length=1, max_length=100)
     description: str | None = None
     category: str | None = None
     unit: str = "piece"
@@ -16,8 +16,8 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: str | None = None
-    sku: str | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    sku: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = None
     category: str | None = None
     unit: str | None = None

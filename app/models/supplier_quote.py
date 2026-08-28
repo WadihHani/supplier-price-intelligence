@@ -1,10 +1,14 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 
 from app.database.session import Base
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 class SupplierQuote(Base):
@@ -48,7 +52,7 @@ class SupplierQuote(Base):
     quote_date: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=utc_now,
     )
 
     valid_until: Mapped[datetime | None] = mapped_column(
@@ -69,12 +73,12 @@ class SupplierQuote(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=utc_now,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=utc_now,
+        onupdate=utc_now,
     )
