@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Boolean, DateTime, Float, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.session import Base
@@ -48,6 +48,16 @@ class Supplier(Base):
         Boolean,
         nullable=False,
         default=True,
+    )
+
+    reliability_score: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    delivery_score: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

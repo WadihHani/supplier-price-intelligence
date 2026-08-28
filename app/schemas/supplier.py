@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class SupplierBase(BaseModel):
@@ -10,6 +10,16 @@ class SupplierBase(BaseModel):
     phone: str | None = None
     country: str | None = None
     website: str | None = None
+    reliability_score: float | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
+    delivery_score: float | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
 
 
 class SupplierCreate(SupplierBase):
@@ -24,6 +34,16 @@ class SupplierUpdate(BaseModel):
     country: str | None = None
     website: str | None = None
     is_active: bool | None = None
+    reliability_score: float | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
+    delivery_score: float | None = Field(
+        default=None,
+        ge=0,
+        le=100,
+    )
 
 
 class SupplierResponse(SupplierBase):

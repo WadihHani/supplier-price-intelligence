@@ -5,9 +5,11 @@ from app.database.session import get_db
 from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
 from app.schemas.procurement_analysis import ProcurementAnalysisResponse
 from app.schemas.quote_comparison import QuoteComparisonResponse
+from app.schemas.supplier_scoring import SupplierScoringResponse
 from app.services.product import product_service
 from app.services.procurement_analysis import procurement_analysis_service
 from app.services.quote_comparison import quote_comparison_service
+from app.services.supplier_scoring import supplier_scoring_service
 
 
 router = APIRouter(
@@ -80,6 +82,25 @@ def get_product_procurement_analysis(
     )
 
     return procurement_analysis_service.analyze_product_quotes(
+        db,
+        product_id,
+    )
+
+
+@router.get(
+    "/{product_id}/supplier-ranking",
+    response_model=SupplierScoringResponse,
+)
+def get_product_supplier_ranking(
+    product_id: int,
+    db: Session = Depends(get_db),
+):
+    product_service.get_product(
+        db,
+        product_id,
+    )
+
+    return supplier_scoring_service.analyze_supplier_options(
         db,
         product_id,
     )
