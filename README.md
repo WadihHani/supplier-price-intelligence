@@ -164,6 +164,19 @@ python scripts/create_dev_user.py developer@example.com
 
 The helper uses the same validation, hashing, and duplicate-email handling as the authentication service. A user can also be created through POST /api/v1/auth/register.
 
+## Optional Demo Dataset
+
+The manual demo seeder adds five fictional suppliers, eight products, and 33 competing quotes to the configured development database:
+
+~~~powershell
+alembic upgrade head
+python scripts/seed_demo_data.py
+~~~
+
+It creates only missing demo records, so repeated runs are safe and existing records are not overwritten or deleted. The data includes price spreads, distinct supplier performance scores, an inactive quote, and USD/EUR examples that remain independently ranked. It does not create users, passwords, tokens, or API credentials.
+
+Create the demo user separately with the hidden-password workflow above. A normal user is sufficient for the read-only dashboard demo. Delete endpoints require an administrator, and the application intentionally provides no public admin-promotion endpoint or default administrator credential.
+
 ## Testing
 
 ~~~powershell
@@ -196,7 +209,17 @@ React Router requires an SPA fallback so unknown frontend paths serve index.html
 
 ## Screenshots
 
-The repository reserves docs/screenshots/ for reviewed application screenshots. Suggested captures are listed in [docs/DEMO.md](docs/DEMO.md); no fabricated screenshots are included.
+The repository reserves docs/screenshots/ for reviewed application screenshots. The five strongest README images to capture are:
+
+| Planned file | What it should show |
+| --- | --- |
+| docs/screenshots/dashboard.png | Live product, supplier, quote, and active-quote totals |
+| docs/screenshots/quotes.png | Several suppliers competing for the same product |
+| docs/screenshots/procurement-intelligence.png | Currency-aware comparison and savings analysis |
+| docs/screenshots/supplier-ranking.png | Price, reliability, delivery, activity, and final scores |
+| docs/screenshots/ai-recommendation.png | Deterministic recommendation with its AI/fallback explanation |
+
+The files are intentionally not referenced as images until real captures exist, avoiding broken or fabricated screenshots. The complete capture checklist is in [docs/DEMO.md](docs/DEMO.md).
 
 ## Future Improvements
 
