@@ -1,6 +1,6 @@
 import pytest
 
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.core.security import create_access_token
 
 
@@ -60,3 +60,27 @@ def test_missing_jwt_secret_fails_clearly(monkeypatch):
 
     with pytest.raises(RuntimeError, match="JWT_SECRET_KEY"):
         create_access_token(1)
+
+
+@pytest.mark.parametrize(
+    ("database_url", "expected"),
+    [
+        ("sqlite:///./local.db", "sqlite:///./local.db"),
+        (
+            "postgresql://user:password@host:5432/database",
+            "postgresql+psycopg://user:password@host:5432/database",
+        ),
+        (
+            "postgres://user:password@host:5432/database",
+            "postgresql+psycopg://user:password@host:5432/database",
+        ),
+        (
+            "postgresql+psycopg://user:password@host:5432/database",
+            "postgresql+psycopg://user:password@host:5432/database",
+        ),
+    ],
+)
+def test_database_url_uses_expected_sqlalchemy_driver(database_url, expected):
+    configured = Settings(database_url=database_url)
+
+    assert configured.database_url == expected

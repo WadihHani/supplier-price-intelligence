@@ -45,7 +45,7 @@ The backend preserves a Repository -> Service -> API separation: repositories ha
 | --- | --- |
 | Backend | Python 3.12, FastAPI, Pydantic, SQLAlchemy, Alembic, Uvicorn |
 | Frontend | React, TypeScript, Vite, React Router, Fetch API |
-| Database | SQLite for local/demo use; environment-driven SQLAlchemy URL |
+| Database | SQLite for local/demo use; PostgreSQL for production through `DATABASE_URL` |
 | Testing | pytest, FastAPI/Starlette TestClient, TypeScript compiler, Vite build |
 | Security | bcrypt password hashing, signed expiring JWTs, route authorization, configurable CORS |
 
@@ -203,9 +203,15 @@ GET /health is public and returns a minimal deployment health response.
 
 ## Deployment
 
-A provider-neutral production design uses static hosting for frontend/dist, a Python web service for FastAPI, and a persistent managed relational database when production durability is required. Apply migrations before starting the backend, provide a strong JWT secret, set exact CORS origins, and build the frontend with the deployed API URL.
+The prepared production architecture uses Vercel for the Vite frontend, Render for the FastAPI service, and a compatible managed PostgreSQL database. Local development continues to use SQLite. Provider credentials, the JWT secret, database URL, CORS origins, and optional AI key stay in provider environment configuration and are never committed.
 
-React Router requires an SPA fallback so unknown frontend paths serve index.html. Detailed steps and dynamic PORT examples are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+React Router's Vercel fallback is defined in `frontend/vercel.json`, while `render.yaml` defines the backend build, start, and health-check settings without creating paid resources. Detailed database migration, environment, security, and verification steps are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+Live links can be added after deployment:
+
+- Live demo: pending
+- API: pending
+- API documentation: pending
 
 ## Screenshots
 

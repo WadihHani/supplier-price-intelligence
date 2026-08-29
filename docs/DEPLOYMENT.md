@@ -1,78 +1,150 @@
-# Deployment Checklist
+# Deployment Guide
 
-This guide is provider-neutral. No hosting provider or production database has been selected, and following it does not create or deploy infrastructure.
+The selected deployment architecture is a Vercel static frontend, a Render FastAPI web service, and a managed PostgreSQL database. Nothing in this repository creates provider accounts or paid resources, and all production credentials remain in provider environment settings.
 
-## Recommended Topology
+## Local
 
-- **Frontend:** static hosting for the Vite dist/ output
-- **Backend:** Python web service running FastAPI with Uvicorn
-- **Database:** SQLite for local/demo use; a managed relational database for durable, concurrent production use
+Local development continues to use SQLite. Copy the example environment files, replace the JWT placeholder, run migrations, and start both applications:
 
-Before switching database engines, select the platform, add its SQLAlchemy driver to requirements.txt, and test all existing migrations against that engine.
+~~~powershell
+Copy-Item .env.example .env
+alembic upgrade head
+uvicorn app.main:app --reload
 
-## Backend
+cd frontend
+Copy-Item .env.example .env
+npm install
+npm run dev
+~~~
 
-1. Install the supported Python version and dependencies:
+The local frontend calls `http://127.0.0.1:8000`, and the default database remains `sqlite:///./supplier_intelligence.db`.
 
-   ~~~text
-   python -m pip install -r requirements.txt
-   ~~~
+## Production
 
-2. Configure these environment variables in the host's secret/configuration system:
+The production request flow is:
 
-   - DATABASE_URL
-   - JWT_SECRET_KEY
-   - JWT_ALGORITHM
-   - JWT_ACCESS_TOKEN_EXPIRE_MINUTES
-   - CORS_ALLOWED_ORIGINS
-   - AI_PROVIDER
-   - AI_MODEL
-   - AI_API_KEY only when required by the selected provider
+~~~text
+Vercel React application -> Render FastAPI service -> managed PostgreSQL
+~~~
 
-3. Apply schema migrations to the production database before starting the new application version:
+Use any compatible managed PostgreSQL provider, including Render Postgres, Neon, or Supabase. Do not deploy with SQLite: a web service's local filesystem may be ephemeral and is unsuitable for durable concurrent production data.
 
-   ~~~text
-   alembic upgrade head
-   ~~~
+### 1. Create the database
 
-4. Start the API on the host-provided port. A POSIX-style command is:
+1. Create a managed PostgreSQL database using the provider's free offering if one is suitable.
+2. Copy its connection URL into Render's secret environment configuration as `DATABASE_URL`.
+3. Do not place that URL in Git, `.env.example`, `render.yaml`, build logs, or frontend variables.
 
-   ~~~sh
-   uvicorn app.main:app --host 0.0.0.0 --port "$PORT"
-   ~~~
+The application accepts provider URLs beginning with `postgresql://` or legacy `postgres://` and selects SQLAlchemy's Psycopg 3 driver automatically. An explicit URL is also supported:
 
-   For local POSIX use, set PORT to 8000 if no platform supplies it. In PowerShell, where PORT is supplied:
+~~~text
+postgresql+psycopg://USER:PASSWORD@HOST:5432/DATABASE
+~~~
 
-   ~~~powershell
-   uvicorn app.main:app --host 0.0.0.0 --port $env:PORT
-   ~~~
+### 2. Configure the backend on Render
 
-5. Configure the health check as GET /health. It requires no authentication and returns no internal configuration.
+Create a Blueprint from the repository's `render.yaml`, or enter the equivalent settings in the Render dashboard:
 
-## Frontend
+| Setting | Value |
+| --- | --- |
+| Runtime | Python |
+| Build command | `pip install -r requirements.txt` |
+| Start lifecycle | `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| Health check path | `/health` |
 
-1. Install exactly from the committed lockfile:
+The checked-in Blueprint deliberately does not create a database or select a paid plan. Automatic deployment is disabled so configuration can be reviewed before the first release. To remain usable without Render's paid pre-deploy feature, it applies the idempotent Alembic migration immediately before Uvicorn starts.
 
-   ~~~text
-   npm ci
-   ~~~
+Before the first application start, and before each release containing migrations, run:
 
-2. Set VITE_API_BASE_URL to the externally reachable backend origin, without an API path suffix.
-3. Run npm run build and publish the generated frontend/dist/ directory.
-4. Configure the static host to return index.html for unknown application routes. This SPA fallback is required when refreshing /login, /products, /suppliers, /quotes, or /intelligence.
-5. Add the exact deployed frontend origin to backend CORS_ALLOWED_ORIGINS. Use a comma-separated list for multiple trusted origins; do not use a wildcard with credentialed requests.
+~~~text
+alembic upgrade head
+~~~
 
-## Security and Operations
+Render's dedicated pre-deploy command is not available on every service plan. If a paid service is selected later, move `alembic upgrade head` to that dedicated phase and leave Uvicorn as the start command. Do not embed a database credential in either command.
 
-- Generate a long, random, deployment-specific JWT_SECRET_KEY; never reuse the example placeholder.
-- Store secrets in the deployment provider's secret manager or environment configuration, never in Git.
-- Terminate public traffic with HTTPS and expose only the necessary service ports.
-- Restrict CORS to exact trusted frontend origins.
-- Keep access-token lifetime appropriate for the environment.
-- Use a persistent production database and configure tested backups and restore procedures.
-- Review logs without recording passwords, bearer tokens, or provider credentials.
-- Run pytest -W error, npm run build, and npm audit before each release.
+### 3. Configure the frontend on Vercel
 
-## Release Verification
+Import the same GitHub repository and use these project settings:
 
-After deployment, verify /health, /docs according to the intended documentation policy, login, protected collection endpoints, procurement intelligence for a known product, expired-token rejection, and logout. Confirm that direct navigation to each frontend route receives the SPA entry point.
+| Setting | Value |
+| --- | --- |
+| Root directory | `frontend` |
+| Framework preset | Vite |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+
+Set `VITE_API_BASE_URL` to the deployed Render origin, such as `https://api.example.com`, without `/api/v1` and without embedding credentials. Vite reads this value at build time, so redeploy after changing it.
+
+`frontend/vercel.json` rewrites direct requests to `index.html`, allowing React Router to resolve `/dashboard`, `/products`, `/suppliers`, `/quotes`, and `/intelligence` after refresh.
+
+### 4. Connect the origins
+
+After Vercel assigns the real frontend origin, set Render's `CORS_ALLOWED_ORIGINS` to that exact HTTPS origin. Multiple trusted origins may be supplied as a comma-separated list. Do not use a wildcard for this authenticated API.
+
+## Backend Environment
+
+Configure these values in Render, not in Git:
+
+| Variable | Production guidance |
+| --- | --- |
+| `DATABASE_URL` | Secret managed PostgreSQL connection URL |
+| `JWT_SECRET_KEY` | Long, random, deployment-specific secret |
+| `JWT_ALGORITHM` | `HS256` unless intentionally changed and tested |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Appropriate token lifetime, such as `30` |
+| `CORS_ALLOWED_ORIGINS` | Exact deployed frontend origin(s) |
+| `AI_PROVIDER` | `mock` for keyless demo or `openai` when configured |
+| `AI_MODEL` | Backend provider model identifier |
+| `AI_API_KEY` | Backend-only secret; omit when using `mock` |
+
+`AI_API_KEY` must never be configured in Vercel or exposed through a `VITE_` variable. If a configured AI provider is unavailable, the deterministic procurement recommendation and fallback explanation remain functional.
+
+## Frontend Environment
+
+Configure this build-time value in Vercel:
+
+~~~text
+VITE_API_BASE_URL=https://api.example.com
+~~~
+
+Replace the example with the real backend origin. The production build fails clearly when the value is missing.
+
+## Database Migration
+
+Alembic reads the same environment-driven `DATABASE_URL` as the application. The production migration command is:
+
+~~~text
+alembic upgrade head
+~~~
+
+Keep the migration history intact and apply migrations before starting the corresponding backend version. Configure tested database backups and a restore procedure with the selected PostgreSQL provider.
+
+## Optional Demo Data
+
+Demo data is never loaded automatically. After migrations, optionally run this manually in an authorized backend environment:
+
+~~~text
+python scripts/seed_demo_data.py
+~~~
+
+The script uses `DATABASE_URL`, creates only missing fictional demo records, and does not create credentials. Re-running it does not delete or overwrite existing application data.
+
+## Authentication and Administration
+
+No default administrator or production credential exists. `scripts/create_dev_user.py` intentionally creates regular development users only; do not treat it as an administrator-provisioning tool. Provisioning a production administrator requires a separate, audited operational decision rather than a public privilege-escalation endpoint.
+
+`POST /api/v1/auth/register` is currently public. That is convenient for a portfolio demonstration, but unrestricted registration and the absence of rate limiting should be reviewed before exposing the application to untrusted production traffic. Do not publish sensitive business data in a public demo.
+
+## Production Verification
+
+After deployment, verify without exposing secrets:
+
+1. `GET /health` returns only `{"status":"healthy"}`.
+2. `/docs` loads according to the intended public documentation policy.
+3. Registration/login works with a test user and invalid/expired tokens are rejected.
+4. The dashboard and protected products, suppliers, quotes, and procurement intelligence views load.
+5. Direct navigation to frontend routes returns the React application.
+6. Currency groups remain independent in comparison, analysis, ranking, and recommendations.
+7. AI explanations work with the selected provider and fall back deterministically when it is unavailable.
+8. Logout clears the browser session.
+
+Before each release, run `pytest -W error`, `npm run build`, `npm audit`, and a secret scan of tracked files.
