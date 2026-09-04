@@ -207,11 +207,11 @@ The prepared production architecture uses Vercel for the Vite frontend, Render f
 
 React Router's Vercel fallback is defined in `frontend/vercel.json`, while `render.yaml` defines the backend build, start, and health-check settings without creating paid resources. Detailed database migration, environment, security, and verification steps are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-Live links can be added after deployment:
+Live deployment:
 
-- Live demo: pending
-- API: pending
-- API documentation: pending
+- Live demo: pending frontend deployment
+- API: https://supplier-price-intelligence-api.onrender.com
+- API documentation: https://supplier-price-intelligence-api.onrender.com/docs
 
 ## Screenshots
 
