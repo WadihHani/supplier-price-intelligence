@@ -45,7 +45,7 @@ The backend preserves a Repository -> Service -> API separation: repositories ha
 | --- | --- |
 | Backend | Python 3.12, FastAPI, Pydantic, SQLAlchemy, Alembic, Uvicorn |
 | Frontend | React, TypeScript, Vite, React Router, Fetch API |
-| Database | SQLite for local/demo use; PostgreSQL for production through `DATABASE_URL` |
+| Database | SQLite for local development; PostgreSQL on Neon for production |
 | Testing | pytest, FastAPI/Starlette TestClient, TypeScript compiler, Vite build |
 | Security | bcrypt password hashing, signed expiring JWTs, route authorization, configurable CORS |
 
@@ -203,13 +203,13 @@ GET /health is public and returns a minimal deployment health response.
 
 ## Deployment
 
-The prepared production architecture uses Vercel for the Vite frontend, Render for the FastAPI service, and a compatible managed PostgreSQL database. Local development continues to use SQLite. Provider credentials, the JWT secret, database URL, CORS origins, and optional AI key stay in provider environment configuration and are never committed.
+The production architecture uses Vercel for the React + Vite frontend, Render for the FastAPI service, and PostgreSQL on Neon. Local development continues to use SQLite. Provider credentials, the JWT secret, database URL, CORS origins, and optional AI key stay in provider environment configuration and are never committed.
 
 React Router's Vercel fallback is defined in `frontend/vercel.json`, while `render.yaml` defines the backend build, start, and health-check settings without creating paid resources. Detailed database migration, environment, security, and verification steps are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 Live deployment:
 
-- Live demo: pending frontend deployment
+- Live demo: https://supplier-price-intelligence.vercel.app
 - API: https://supplier-price-intelligence-api.onrender.com
 - API documentation: https://supplier-price-intelligence-api.onrender.com/docs
 
@@ -229,7 +229,7 @@ The files are intentionally not referenced as images until real captures exist, 
 
 ## Future Improvements
 
-- PostgreSQL-backed production deployment and operational backups
+- Automated production backups and restore drills
 - Historical quote and supplier-performance trends
 - Auditable procurement decision history
 - CSV import/export and richer reporting
