@@ -215,17 +215,23 @@ React Router's Vercel fallback is defined in `frontend/vercel.json`, while `rend
 
 ## Screenshots
 
-The repository reserves docs/screenshots/ for reviewed application screenshots. The five strongest README images to capture are:
+### Dashboard
 
-| Planned file | What it should show |
-| --- | --- |
-| docs/screenshots/dashboard.png | Live product, supplier, quote, and active-quote totals |
-| docs/screenshots/quotes.png | Several suppliers competing for the same product |
-| docs/screenshots/procurement-intelligence.png | Currency-aware comparison and savings analysis |
-| docs/screenshots/supplier-ranking.png | Price, reliability, delivery, activity, and final scores |
-| docs/screenshots/ai-recommendation.png | Deterministic recommendation with its AI/fallback explanation |
+![Supplier Price Intelligence dashboard](docs/screenshots/dash.png)
 
-The files are intentionally not referenced as images until real captures exist, avoiding broken or fabricated screenshots. The complete capture checklist is in [docs/DEMO.md](docs/DEMO.md).
+### Competing Supplier Quotes
+
+![Supplier quotes across products and currencies](docs/screenshots/quotes1.png)
+
+### Currency-Aware Procurement Analysis
+
+![Price comparison and procurement analysis by currency](docs/screenshots/product_ai.png)
+
+### Supplier Ranking and AI Explanation
+
+![Deterministic supplier ranking and AI explanation](docs/screenshots/product_ai2.png)
+
+The complete portfolio walkthrough is available in [docs/DEMO.md](docs/DEMO.md).
 
 ## Future Improvements
 
