@@ -14,6 +14,13 @@ The procurement calculations are deterministic and authoritative. The AI layer r
 - API: [supplier-price-intelligence-api.onrender.com](https://supplier-price-intelligence-api.onrender.com)
 - API Docs: [supplier-price-intelligence-api.onrender.com/docs](https://supplier-price-intelligence-api.onrender.com/docs)
 
+### Demo Credentials
+
+- Email: `demo@supplierpriceintelligence.com`
+- Password: `SupplierDemo2026!`
+
+This shared portfolio account is a normal, non-administrator user. Delete operations remain administrator-only, but other visitors may change shared demo records.
+
 ## Features
 
 - Supplier, product, and supplier-quote CRUD workflows
